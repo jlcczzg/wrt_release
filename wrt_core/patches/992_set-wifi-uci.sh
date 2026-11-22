@@ -3,6 +3,8 @@
 board_name=$(cat /tmp/sysinfo/board_name)
 hotplug_mode=0
 wifi_config_changed=0
+DEFAULT_WIFI_SSID=''
+DEFAULT_WIFI_KEY=''
 [ "${1:-}" = "--hotplug" ] && hotplug_mode=1
 
 wifi_radio_ready() {
@@ -19,6 +21,8 @@ configure_wifi() {
 	local ssid=$5
 	local key=$6
 	local encryption=${7:-"psk2+ccmp"} # 新增 encryption 参数，如果为空则默认为 psk2+ccmp
+	[ -n "$DEFAULT_WIFI_SSID" ] && ssid="$DEFAULT_WIFI_SSID"
+	[ -n "$DEFAULT_WIFI_KEY" ] && key="$DEFAULT_WIFI_KEY"
 	if [ "$hotplug_mode" = "1" ] && ! wifi_radio_ready "$radio"; then
 		return 0
 	fi
@@ -77,6 +81,8 @@ configure_wifi7() {
 	local ssid=$5
 	local key=$6
 	local encryption=${7:-"psk2"} # 新增 encryption 参数，如果为空则默认为 psk2
+	[ -n "$DEFAULT_WIFI_SSID" ] && ssid="$DEFAULT_WIFI_SSID"
+	[ -n "$DEFAULT_WIFI_KEY" ] && key="$DEFAULT_WIFI_KEY"
 	if [ "$hotplug_mode" = "1" ] && ! wifi_radio_ready "$radio"; then
 		return 0
 	fi
@@ -193,7 +199,8 @@ jdcloud,ax1800-pro | \
 	jdc_ax1800_pro_wifi_cfg
 	;;
 jdcloud,ax6600 | \
-	jdcloud,re-cs-02)
+	jdcloud,re-cs-02 | \
+	jdcloud,re-cs-07)
 	jdc_ax6600_wifi_cfg
 	;;
 zn,m2)
