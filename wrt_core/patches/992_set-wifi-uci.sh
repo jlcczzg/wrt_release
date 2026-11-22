@@ -38,12 +38,12 @@ configure_wifi() {
 					use_local_defaults=1
 				elif [ "$(uci -q get router-tool.radio${radio}.defaults_done)" = "1" ]; then
 					local default_hostname=$(uci -q get system.@system[0].hostname)
-					local board_vendor=$(printf '%s\\n' "${board_name%%,*}" | awk '{ print toupper(substr($0, 1, 1)) substr($0, 2) }')
+					local board_vendor=$(printf '%s\n' "${board_name%%,*}" | awk '{ print toupper(substr($0, 1, 1)) substr($0, 2) }')
 					default_hostname=${default_hostname:-"OWRT"}
 					case "$now_ssid" in
-						"$default_hostname-$board_vendor-2.4G"|\\
-						"$default_hostname-$board_vendor-5.2G"|\\
-						"$default_hostname-$board_vendor-5.8G"|\\
+						"$default_hostname-$board_vendor-2.4G"|\
+						"$default_hostname-$board_vendor-5.2G"|\
+						"$default_hostname-$board_vendor-5.8G"|\
 						"$default_hostname-$board_vendor-6G")
 							use_local_defaults=1
 							;;
