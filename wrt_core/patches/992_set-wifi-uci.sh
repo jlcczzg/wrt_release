@@ -28,29 +28,30 @@ configure_wifi() {
 	fi
 	local now_encryption=$(uci -q get wireless.default_radio${radio}.encryption)
 	if [ -n "$now_encryption" ] && [ "$now_encryption" != "none" ]; then
-		local now_ssid=$(uci -q get wireless.default_radio${radio}.ssid)
-		local now_key=$(uci -q get wireless.default_radio${radio}.key)
-		local use_local_defaults=0
-
-		if [ "$now_encryption" = "$encryption" ] && [ "$now_key" = "$key" ]; then
-			if [ "$now_ssid" = "OWRT" ]; then
-				use_local_defaults=1
-			elif [ "$(uci -q get router-tool.radio${radio}.defaults_done)" = "1" ]; then
-				local default_hostname=$(uci -q get system.@system[0].hostname)
-				local board_vendor=$(printf '%s\n' "${board_name%%,*}" | awk '{ print toupper(substr($0, 1, 1)) substr($0, 2) }')
-				default_hostname=${default_hostname:-"OWRT"}
-				case "$now_ssid" in
-					"$default_hostname-$board_vendor-2.4G"|\
-					"$default_hostname-$board_vendor-5.2G"|\
-					"$default_hostname-$board_vendor-5.8G"|\
-					"$default_hostname-$board_vendor-6G")
-						use_local_defaults=1
-						;;
-				esac
+		# For this customized profile, force the requested credentials only once.
+		if [ -z "$DEFAULT_WIFI_SSID" ] || [ "$(uci -q get wireless.default_radio${radio}.custom_defaults_done)" = "1" ]; then
+			local now_ssid=$(uci -q get wireless.default_radio${radio}.ssid)
+			local now_key=$(uci -q get wireless.default_radio${radio}.key)
+			local use_local_defaults=0
+			if [ "$now_encryption" = "$encryption" ] && [ "$now_key" = "$key" ]; then
+				if [ "$now_ssid" = "OWRT" ]; then
+					use_local_defaults=1
+				elif [ "$(uci -q get router-tool.radio${radio}.defaults_done)" = "1" ]; then
+					local default_hostname=$(uci -q get system.@system[0].hostname)
+					local board_vendor=$(printf '%s\\n' "${board_name%%,*}" | awk '{ print toupper(substr($0, 1, 1)) substr($0, 2) }')
+					default_hostname=${default_hostname:-"OWRT"}
+					case "$now_ssid" in
+						"$default_hostname-$board_vendor-2.4G"|\\
+						"$default_hostname-$board_vendor-5.2G"|\\
+						"$default_hostname-$board_vendor-5.8G"|\\
+						"$default_hostname-$board_vendor-6G")
+							use_local_defaults=1
+							;;
+					esac
+				fi
 			fi
+			[ "$use_local_defaults" = "1" ] || return 0
 		fi
-
-		[ "$use_local_defaults" = "1" ] || return 0
 	fi
 	uci -q batch <<EOF
 set wireless.radio${radio}.channel="${channel}"
@@ -70,6 +71,9 @@ set wireless.default_radio${radio}.bss_transition='1'
 set wireless.default_radio${radio}.wnm_sleep_mode='1'
 set wireless.default_radio${radio}.wnm_sleep_mode_no_keys='1'
 EOF
+	if [ -n "$DEFAULT_WIFI_SSID" ]; then
+		uci set wireless.default_radio${radio}.custom_defaults_done='1'
+	fi
 	wifi_config_changed=1
 }
 
