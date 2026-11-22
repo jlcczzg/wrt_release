@@ -197,7 +197,7 @@ install_custom_feed() {
         msd_lite luci-app-msd_lite cups luci-app-cupsd
     )
     local required_feed_dirs=(
-        cups tcping v2ray-geodata luci-lib-taskd luci-app-openclash
+        cups tcping v2ray-geodata luci-lib-taskd luci-app-openclash luci-app-autoreboot
         luci-app-netwiz luci-app-homeproxy luci-app-mosdns geo2txt
         luci-app-passwall nikki luci-app-nikki mihomo-meta
         open-app-filter luci-app-oaf lucky luci-app-lucky luci-app-easytier
@@ -248,6 +248,11 @@ install_custom_feed() {
             return 1
         fi
     done
+
+    if ! sync_repo_root_package_to_feed_dir "https://github.com/f8q8/luci-app-autoreboot.git" "master" "$custom_feed_dir" "f8q8/luci-app-autoreboot" "luci-app-autoreboot"; then
+        rm -rf "$custom_feed_dir"
+        return 1
+    fi
 
     if ! sync_repo_root_package_to_feed_dir "https://github.com/adminchenyu/eMMC-Health.git" "main" "$custom_feed_dir" "adminchenyu/eMMC-Health" "luci-app-emmc-health"; then
         rm -rf "$custom_feed_dir"
