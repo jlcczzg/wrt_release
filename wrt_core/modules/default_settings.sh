@@ -47,6 +47,14 @@ fix_default_set() {
         install -Dm544 "$BASE_PATH/patches/992_set-wifi-uci.sh" "$wifi_defaults_path"
     fi
 
+    # Apply per-device wireless defaults to first-boot Wi-Fi setup.
+    if [[ -n "${WIFI_SSID:-}" ]]; then
+        sed -i "s|^DEFAULT_WIFI_SSID=.*|DEFAULT_WIFI_SSID='${WIFI_SSID}'|" "$BASE_PATH/patches/992_set-wifi-uci.sh"
+    fi
+    if [[ -n "${WIFI_PASSWORD:-}" ]]; then
+        sed -i "s|^DEFAULT_WIFI_KEY=.*|DEFAULT_WIFI_KEY='${WIFI_PASSWORD}'|" "$BASE_PATH/patches/992_set-wifi-uci.sh"
+    fi
+
     if [ -f "$BUILD_DIR/package/emortal/autocore/files/tempinfo" ]; then
         if [ -f "$BASE_PATH/patches/tempinfo" ]; then
             \cp -f "$BASE_PATH/patches/tempinfo" "$BUILD_DIR/package/emortal/autocore/files/tempinfo"
