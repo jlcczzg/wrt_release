@@ -417,6 +417,10 @@ REPO_BRANCH=${REPO_BRANCH:-main}
 BUILD_DIR=$(read_ini_by_key "BUILD_DIR")
 COMMIT_HASH=$(read_ini_by_key "COMMIT_HASH")
 COMMIT_HASH=${COMMIT_HASH:-none}
+LAN_ADDR=$(read_ini_by_key "LAN_ADDR")
+WIFI_SSID=$(read_ini_by_key "WIFI_SSID")
+WIFI_PASSWORD=$(read_ini_by_key "WIFI_PASSWORD")
+export LAN_ADDR WIFI_SSID WIFI_PASSWORD
 
 resolve_config_fragments
 
