@@ -3,6 +3,14 @@
 
 fix_default_set() {
     # 替换默认主题依赖，并注入系统设置和目标平台通用补丁。
+    # Apply per-device wireless defaults before copying the first-boot script.
+    if [[ -n "${WIFI_SSID:-}" ]]; then
+        sed -i "s|^DEFAULT_WIFI_SSID=.*|DEFAULT_WIFI_SSID='${WIFI_SSID}'|" "$BASE_PATH/patches/992_set-wifi-uci.sh"
+    fi
+    if [[ -n "${WIFI_PASSWORD:-}" ]]; then
+        sed -i "s|^DEFAULT_WIFI_KEY=.*|DEFAULT_WIFI_KEY='${WIFI_PASSWORD}'|" "$BASE_PATH/patches/992_set-wifi-uci.sh"
+    fi
+
     if [ -d "$BUILD_DIR/feeds/luci/collections/" ]; then
         find "$BUILD_DIR/feeds/luci/collections/" -type f -name "Makefile" -exec sed -i "s/luci-theme-bootstrap/luci-theme-$THEME_SET/g" {} \;
     fi
